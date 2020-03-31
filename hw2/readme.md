@@ -9,6 +9,7 @@
 此题即将一个图片做仿射变形，将`Source`图片仿射到`Target`图片的方框内部，最后生成结果图`Result`，对于不能对齐的点，此处选择的是`Inverse warping`的处理模式。  
 
 由课上老师所讲，此处的变形即是一个线性变换，$Ax=b$，其中$x$表示`Source`内的坐标，$b$表示`Result`内的坐标，首先即求出变换矩阵$A$，由于这是一个仿射变换，其自由度为6，只有6个值不确定，选择变换前后三个对应点的坐标即可将$A$解出。如下：  
+
 $$
 \begin{vmatrix}
 	a&b&c\\
@@ -29,6 +30,7 @@ $$
 \end{vmatrix}
 \tag{1}
 $$
+
 解出$a,b,c,d,e,f$值即可，此处调用了`Eigen`库中的相应函数。  
 
 之后则由$b$解出对应的$x$,即由在`Result`中的坐标解出对应的`Source`中的坐标即可，如下：  
@@ -95,6 +97,7 @@ else
 <img src="./image/eg.png" style="zoom:67%;" />
 
 如上图，要将位于直角坐标图中的一个点$p$映射到其极坐标中$P$。在极坐标中，点$P$的图片中的坐标$(x,y)$与其在以$O$为圆点的坐标系中的对应转换关系为：
+
 $$
 \left\{\begin{array}{cc} 
 		x=j-R\\ 
@@ -102,7 +105,9 @@ $$
 \end{array}\right.
 \tag{2}
 $$
+
 与点$p$在直角坐标系中对应的转换关系为：
+
 $$
 \left\{\begin{array}{cc} 
 		m=r\times\delta_r\\ 
@@ -110,7 +115,9 @@ $$
 \end{array}\right.
 \tag{3}
 $$
+
 其中
+
 $$
 \left\{\begin{array}{cc} 
 		r=\sqrt{x^2+y^2}\\ 
@@ -120,6 +127,7 @@ $$
 \end{array}\right.
 \tag{4}
 $$
+
 之后对于圆中的部分进行填充，对于不能对齐的点，使用`Inverse warping`处理模式，将点进行双线性插值计算，插值函数见上。并且此处预计到可能有的点转换回去之后其不位于原图中，则将点的`floor(x),ceil(x),floor(y),ceil(y)`值进行边界处理，如下：
 
 ```c++
