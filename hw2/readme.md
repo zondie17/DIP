@@ -6,20 +6,20 @@
 
 #### 设计思路及关键代码
 
-此题即将一个图片做仿射变形，将`Source`图片仿射到`Target`图片的方框内部，最后生成结果图`Result`，对于不能对齐的点，此处选择的是`Inverse warping`的处理模式。
+此题即将一个图片做仿射变形，将`Source`图片仿射到`Target`图片的方框内部，最后生成结果图`Result`，对于不能对齐的点，此处选择的是`Inverse warping`的处理模式。  
 
-由课上老师所讲，此处的变形即是一个线性变换，$Ax=b$，其中$x$表示`Source`内的坐标，$b$表示`Result`内的坐标，首先即求出变换矩阵$A$，由于这是一个仿射变换，其自由度为6，只有6个值不确定，选择变换前后三个对应点的坐标即可将$A$解出。如下：
+由课上老师所讲，此处的变形即是一个线性变换，$Ax=b$，其中$x$表示`Source`内的坐标，$b$表示`Result`内的坐标，首先即求出变换矩阵$A$，由于这是一个仿射变换，其自由度为6，只有6个值不确定，选择变换前后三个对应点的坐标即可将$A$解出。如下：  
 $$
 \begin{vmatrix}
 	a&b&c\\
 	d&e&f\\
-	0&0&1
+	0&0&1\\
 \end{vmatrix}
  \times
 \begin{vmatrix}
 	x_1&x_2&x_3\\
 	y_1&y_2&y_3\\
-	1&1&1
+	1&1&1\\
 \end{vmatrix}
 =
 \begin{vmatrix}
@@ -29,15 +29,15 @@ $$
 \end{vmatrix}
 \tag{1}
 $$
-解出$a,b,c,d,e,f$值即可，此处调用了`Eigen`库中的相应函数。
+解出$a,b,c,d,e,f$值即可，此处调用了`Eigen`库中的相应函数。  
 
-之后则由$b$解出对应的$x$,即由在`Result`中的坐标解出对应的`Source`中的坐标即可，如下：
+之后则由$b$解出对应的$x$,即由在`Result`中的坐标解出对应的`Source`中的坐标即可，如下：  
 
 ```c++
 Eigen::Vector3f vecX = A.colPivHouseholderQr().solve(vecB);
 ```
 
-之后解出的结果若是位于`Source`中，则用`Source`中的`bgr`值填充（解出的结果位于`Source`中即意味着当前点在`Result`的方框内部），否则即用`Target`中相应点填充即可。如下：
+之后解出的结果若是位于`Source`中，则用`Source`中的`bgr`值填充（解出的结果位于`Source`中即意味着当前点在`Result`的方框内部），否则即用`Target`中相应点填充即可。如下：  
 
 ```c++
 if (0 <= x && x < source.rows && 0 <= y && y < source.cols)
@@ -46,7 +46,7 @@ else
 	result.at<Vec3b>(i,j) = target.at<Vec3b>(i,j);
 ```
 
-另对于不能对齐的点，此处选择的是`Inverse warping`的处理模式，将点进行双线性插值计算（不过感觉并没有比直接去单个邻近点效果好..）。插值函数代码如下：
+另对于不能对齐的点，此处选择的是`Inverse warping`的处理模式，将点进行双线性插值计算（不过感觉并没有比直接去单个邻近点效果好..）。插值函数代码如下：  
 
 ```c++
 // xf = floor(x), xc = ceil(x), yf = floor(y), yc = ceil(y)
@@ -73,7 +73,7 @@ else {
 
 设计思路即如课上老师所讲，求出其对应的$\rho_0,d_0,\rho,\theta,\phi,d,r_{in}(x),r_{out}(y)$即可。对应计算公式在课件上，此处不表...另对于不能对齐的点，此处选择的也是`Inverse warping`的处理模式，不过选择的是直接选择临近点填充，并且对于圆内没有对应点的部分，统一填充为了灰色。
 
-关键填充部分代码如下：
+关键填充部分代码如下：  
 
 ```c++
 if (-in.rows/2.0 <= x && x <= in.rows/2.0 && -in.cols/2.0 <= y && y <= in.cols/2.0)
